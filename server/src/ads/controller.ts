@@ -1,11 +1,11 @@
-import { JsonController, Get, HttpCode, Body, Post, Param, Put, NotFoundError } from 'routing-controllers'
+import { JsonController, Get, HttpCode, Body, Post, Param, Put, NotFoundError, Delete } from 'routing-controllers'
 import Ad from './entity';
 
 
 @JsonController()
 export default class AdController {
 
-    @Post('/Ads')
+    @Post('/ads')
     @HttpCode(201)
     createAd(
       @Body() ad: Ad
@@ -13,7 +13,7 @@ export default class AdController {
        return ad.save()
     }
 
-    @Get('/Ads/:id')
+    @Get('/ads/:id')
     getAd(
       @Param('id') id: number
     ) {
@@ -26,7 +26,7 @@ export default class AdController {
       return { ads }
     }
 
-    @Put('/Ads/:id')
+    @Put('/ads/:id')
     async updateAd(
       @Param('id') id: number,
       @Body() udpate: Partial<Ad>
@@ -35,5 +35,22 @@ export default class AdController {
       if (!ad) throw new NotFoundError('Ad not found')
 
       return Ad.merge(ad, udpate).save()
+    }
+
+    @Delete('/ads/:id')
+    async deleteAd(
+      @Param('id') id: number
+    ) {
+      const ad = await Ad.findOne(id)
+      if (!ad) {
+        throw new NotFoundError('Ad not found')
+      } else {
+        const adIsDeleted = Ad.delete(ad)
+        if (adIsDeleted) {
+          return {message: 'ad has been deleted succesfully'}
+        }
+      }
+
+      return Ad.delete(id)
     }
 }
